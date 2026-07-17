@@ -47,7 +47,7 @@ const settingsSchema = new mongoose.Schema(
     booksPageDesc:    { type: String, default: 'A curated collection of volumes shaping perspective.' },
     journalPageTitle: { type: String, default: 'Notes from the Archive' },
     journalPageDesc:  { type: String, default: 'A collection of thoughts, reflections, and deep dives.' },
-    letterboxdUsername: { type: String, default: '' },
+    letterboxdUsername: { type: String, default: 'engelibrahimo' },
     hasSeeded: { type: Boolean, default: false },
   },
   { timestamps: true }

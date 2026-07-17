@@ -34,7 +34,7 @@ export const DEFAULT_SETTINGS: AdminSettings = {
   booksPageDesc: 'A curated collection of volumes shaping perspective.',
   journalPageTitle: 'Notes from the Archive',
   journalPageDesc: 'A collection of thoughts, reflections, and deep dives into the spaces between technology, philosophy, and daily existence.',
-  letterboxdUsername: '',
+  letterboxdUsername: 'engelibrahimo',
 }
 
 export interface AdminSettings {

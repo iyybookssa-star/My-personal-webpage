@@ -1,14 +1,17 @@
 import { useAdmin } from '../context/AdminContext'
 
-const socials = [
-  { label: 'Twitter', href: '#' },
-  { label: 'Letterboxd', href: '#' },
-  { label: 'Steam', href: '#' },
-  { label: 'RSS', href: '#' },
-]
-
 export default function Footer() {
   const { settings } = useAdmin()
+
+  const letterboxdUser = settings.letterboxdUsername || 'engelibrahimo'
+  const letterboxdHref = `https://letterboxd.com/${letterboxdUser}/`
+
+  const socials = [
+    { label: 'Twitter', href: '#' },
+    { label: 'Letterboxd', href: letterboxdHref },
+    { label: 'Steam', href: '#' },
+    { label: 'RSS', href: '#' },
+  ]
 
   return (
     <footer className="footer">
