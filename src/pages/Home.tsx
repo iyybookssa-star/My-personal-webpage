@@ -41,6 +41,7 @@ export default function Home() {
   const [films, setFilms] = useState<FilmItem[]>([])
   const [books, setBooks] = useState<BookItem[]>([])
   const [journals, setJournals] = useState<JournalItem[]>([])
+  const [selectedPoster, setSelectedPoster] = useState<{ img: string; title: string; subtitle: string } | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +60,22 @@ export default function Home() {
     }
     fetchData()
   }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedPoster(null)
+      }
+    }
+    if (selectedPoster) {
+      window.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [selectedPoster])
 
   // Currently Watching (Films)
   const hasFilms = films && films.length > 0
@@ -125,7 +142,14 @@ export default function Home() {
           <div className="bento-grid">
             <div className="bento-main">
               {featuredFilm ? (
-                <article className="bento-feature">
+                <article 
+                  className="bento-feature" 
+                  onClick={() => setSelectedPoster({
+                    img: featuredFilm.img,
+                    title: featuredFilm.title,
+                    subtitle: `${featuredFilm.category} — ${featuredFilm.year}`
+                  })}
+                >
                   <div className="bento-feature-img" style={{ backgroundImage: `url('${featuredFilm.img}')` }} />
                   <div className="bento-feature-overlay">
                     <span className="bento-category">{featuredFilm.category}</span>
@@ -134,7 +158,14 @@ export default function Home() {
                   </div>
                 </article>
               ) : (
-                <article className="bento-feature">
+                <article 
+                  className="bento-feature"
+                  onClick={() => setSelectedPoster({
+                    img: FILM_IMG,
+                    title: 'The Architecture of Silence',
+                    subtitle: 'Film'
+                  })}
+                >
                   <div className="bento-feature-img" style={{ backgroundImage: `url('${FILM_IMG}')` }} />
                   <div className="bento-feature-overlay">
                     <span className="bento-category">Film</span>
@@ -245,6 +276,33 @@ export default function Home() {
           </div>
         </section>
 
+      </div>
+
+      {/* Poster Lightbox Modal */}
+      <div 
+        className={`poster-lightbox${selectedPoster ? ' active' : ''}`}
+        onClick={() => setSelectedPoster(null)}
+      >
+        {selectedPoster && (
+          <div className="poster-lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={selectedPoster.img} 
+              alt={selectedPoster.title} 
+              className="poster-lightbox-img"
+            />
+            <div className="poster-lightbox-info">
+              <h3 className="poster-lightbox-title">{selectedPoster.title}</h3>
+              <p className="poster-lightbox-meta">{selectedPoster.subtitle}</p>
+            </div>
+          </div>
+        )}
+        <button 
+          className="poster-lightbox-close" 
+          onClick={() => setSelectedPoster(null)}
+          aria-label="Close lightbox"
+        >
+          ×
+        </button>
       </div>
     </main>
   )

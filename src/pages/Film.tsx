@@ -18,6 +18,7 @@ export default function Film() {
   const [activeTab, setActiveTab] = useState('All Media')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedFilm, setSelectedFilm] = useState<FilmItem | null>(null)
 
   useEffect(() => {
     fetch('/api/films')
@@ -31,6 +32,22 @@ export default function Film() {
         setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedFilm(null)
+      }
+    }
+    if (selectedFilm) {
+      window.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [selectedFilm])
 
   const filtered = films.filter((f) => {
     const matchTab = activeTab === 'All Media' || f.category === activeTab
@@ -91,7 +108,7 @@ export default function Film() {
         ) : (
           <div className="film-grid">
             {filtered.map((film) => (
-              <article key={film._id} className="film-card">
+              <article key={film._id} className="film-card" onClick={() => setSelectedFilm(film)}>
                 <div
                   className="film-card-img"
                   style={{ backgroundImage: `url('${film.img}')` }}
@@ -113,6 +130,33 @@ export default function Film() {
           </svg>
         </div>
 
+      </div>
+
+      {/* Poster Lightbox Modal */}
+      <div 
+        className={`poster-lightbox${selectedFilm ? ' active' : ''}`}
+        onClick={() => setSelectedFilm(null)}
+      >
+        {selectedFilm && (
+          <div className="poster-lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={selectedFilm.img} 
+              alt={selectedFilm.title} 
+              className="poster-lightbox-img"
+            />
+            <div className="poster-lightbox-info">
+              <h3 className="poster-lightbox-title">{selectedFilm.title}</h3>
+              <p className="poster-lightbox-meta">{selectedFilm.category} — {selectedFilm.year}</p>
+            </div>
+          </div>
+        )}
+        <button 
+          className="poster-lightbox-close" 
+          onClick={() => setSelectedFilm(null)}
+          aria-label="Close lightbox"
+        >
+          ×
+        </button>
       </div>
     </main>
   )
