@@ -23,7 +23,7 @@ export default function Games() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/games')
+    fetch('/api/games')
       .then((r) => r.json())
       .then((data) => {
         setGames(data)

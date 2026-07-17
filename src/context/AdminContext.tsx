@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-const API = 'http://localhost:3001/api/settings'
+const API = '/api/settings'
 
 /* ── Default settings ─────────────────────────────────────── */
 export const DEFAULT_SETTINGS: AdminSettings = {
@@ -151,7 +151,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       })
 
     // 2. Increment site visits count
-    fetch('http://localhost:3001/api/settings/increment-visits', { method: 'POST' })
+    fetch('/api/settings/increment-visits', { method: 'POST' })
       .then((r) => r.json())
       .then((data) => {
         if (data.visits !== undefined) setVisits(data.visits)
@@ -159,7 +159,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       .catch(() => {})
 
     // 3. Fetch total subscriber count
-    fetch('http://localhost:3001/api/subscribers/count')
+    fetch('/api/subscribers/count')
       .then((r) => r.json())
       .then((data) => {
         if (data.count !== undefined) setSubscriberCount(data.count)
@@ -200,7 +200,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const login = async (password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),

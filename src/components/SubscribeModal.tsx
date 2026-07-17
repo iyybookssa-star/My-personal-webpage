@@ -21,7 +21,7 @@ export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps)
     setStatus(null)
 
     try {
-      const response = await fetch('http://localhost:3001/api/subscribers', {
+      const response = await fetch('/api/subscribers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name }),

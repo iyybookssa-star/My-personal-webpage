@@ -61,7 +61,7 @@ export default function CollectionPanel() {
     if (toDelete.length === 0) return
     if (!window.confirm(`Are you sure you want to delete ${toDelete.length} selected item(s)?`)) return
     try {
-      const res = await fetch(`http://localhost:3001/api/${collection}/${toDelete.join(',')}`, {
+      const res = await fetch(`/api/${collection}/${toDelete.join(',')}`, {
         method: 'DELETE',
       })
       if (res.ok) {
@@ -92,7 +92,7 @@ export default function CollectionPanel() {
   const fetchItems = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:3001/api/${collection}`)
+      const res = await fetch(`/api/${collection}`)
       const data = await res.json()
       setItems(data)
     } catch (err) {
@@ -129,7 +129,7 @@ export default function CollectionPanel() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3001/api/${collection}`, {
+      const res = await fetch(`/api/${collection}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -185,7 +185,7 @@ export default function CollectionPanel() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3001/api/${collection}/${editingItem._id}`, {
+      const res = await fetch(`/api/${collection}/${editingItem._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -204,7 +204,7 @@ export default function CollectionPanel() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return
     try {
-      const res = await fetch(`http://localhost:3001/api/${collection}/${id}`, {
+      const res = await fetch(`/api/${collection}/${id}`, {
         method: 'DELETE',
       })
       if (res.ok) fetchItems()
@@ -225,7 +225,7 @@ export default function CollectionPanel() {
     setItems(newItems)
 
     try {
-      await fetch(`http://localhost:3001/api/${collection}/reorder/list`, {
+      await fetch(`/api/${collection}/reorder/list`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderedIds: newItems.map((item) => item._id) }),
@@ -251,7 +251,7 @@ export default function CollectionPanel() {
       await updateSetting('letterboxdUsername', letterboxdUser.trim())
 
       // 2. Start EventSource connection for real-time progress streaming
-      const url = `http://localhost:3001/api/films/sync-letterboxd?username=${encodeURIComponent(letterboxdUser.trim())}`
+      const url = `/api/films/sync-letterboxd?username=${encodeURIComponent(letterboxdUser.trim())}`
       const ev = new EventSource(url)
 
       ev.onmessage = (event) => {

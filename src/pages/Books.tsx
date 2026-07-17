@@ -19,7 +19,7 @@ export default function Books() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/books')
+    fetch('/api/books')
       .then((r) => r.json())
       .then((data) => {
         setBooks(data)

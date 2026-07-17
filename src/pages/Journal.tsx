@@ -20,7 +20,7 @@ export default function Journal() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/journals')
+    fetch('/api/journals')
       .then((r) => r.json())
       .then((data) => {
         setJournals(data)

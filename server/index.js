@@ -22,7 +22,7 @@ const app = express()
 const PORT = process.env.PORT || 3001
 
 // Middleware
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:5174'] }))
+app.use(cors())
 app.use(express.json())
 
 // Routes
@@ -76,49 +76,59 @@ const initialJournals = [
 
 // Start
 connectDB().then(async () => {
-  // Seed initial admin password if none exists
-  const existing = await Admin.findOne({ username: 'admin' })
-  if (!existing) {
-    const initialPassword = process.env.ADMIN_PASSWORD || '2240002989'
-    await Admin.setPassword(initialPassword)
-    console.log('🔑  Admin password seeded from .env (ADMIN_PASSWORD)')
-  }
-  // Update or create main settings document to use "Ibrahim’s Digest"
-  await Settings.findOneAndUpdate(
-    { key: 'main' },
-    { $set: { siteTitle: 'Ibrahim’s Digest' } },
-    { upsert: true, new: true }
-  )
-  // Seed default collections if empty (only if never seeded before)
-  const currentSettings = await Settings.findOne({ key: 'main' })
-  const hasSeeded = currentSettings ? currentSettings.hasSeeded : false
-
-  if (!hasSeeded) {
-    if ((await Film.countDocuments()) === 0) {
-      await Film.create(initialFilms)
-      console.log('🎬  Seeded initial films')
+  try {
+    // Seed initial admin password if none exists
+    const existing = await Admin.findOne({ username: 'admin' })
+    if (!existing) {
+      const initialPassword = process.env.ADMIN_PASSWORD || '2240002989'
+      await Admin.setPassword(initialPassword)
+      console.log('🔑  Admin password seeded from .env (ADMIN_PASSWORD)')
     }
-    if ((await Game.countDocuments()) === 0) {
-      await Game.create(initialGames)
-      console.log('🎮  Seeded initial games')
-    }
-    if ((await Book.countDocuments()) === 0) {
-      await Book.create(initialBooks)
-      console.log('📚  Seeded initial books')
-    }
-    if ((await Journal.countDocuments()) === 0) {
-      await Journal.create(initialJournals)
-      console.log('📝  Seeded initial journal entries')
-    }
-
+    // Update or create main settings document to use "Ibrahim’s Digest"
     await Settings.findOneAndUpdate(
       { key: 'main' },
-      { $set: { hasSeeded: true } },
-      { upsert: true }
+      { $set: { siteTitle: 'Ibrahim’s Digest' } },
+      { upsert: true, new: true }
     )
+    // Seed default collections if empty (only if never seeded before)
+    const currentSettings = await Settings.findOne({ key: 'main' })
+    const hasSeeded = currentSettings ? currentSettings.hasSeeded : false
+
+    if (!hasSeeded) {
+      if ((await Film.countDocuments()) === 0) {
+        await Film.create(initialFilms)
+        console.log('🎬  Seeded initial films')
+      }
+      if ((await Game.countDocuments()) === 0) {
+        await Game.create(initialGames)
+        console.log('🎮  Seeded initial games')
+      }
+      if ((await Book.countDocuments()) === 0) {
+        await Book.create(initialBooks)
+        console.log('📚  Seeded initial books')
+      }
+      if ((await Journal.countDocuments()) === 0) {
+        await Journal.create(initialJournals)
+        console.log('📝  Seeded initial journal entries')
+      }
+
+      await Settings.findOneAndUpdate(
+        { key: 'main' },
+        { $set: { hasSeeded: true } },
+        { upsert: true }
+      )
+    }
+  } catch (seedErr) {
+    console.error('Error seeding data:', seedErr.message)
   }
 
-  app.listen(PORT, () => {
-    console.log(`🚀  API server → http://localhost:${PORT}`)
-  })
+  // Only start listening if we are running locally (not on Vercel)
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    app.listen(PORT, () => {
+      console.log(`🚀  API server → http://localhost:${PORT}`)
+    })
+  }
 })
+
+export default app
+

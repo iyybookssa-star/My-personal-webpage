@@ -14,7 +14,7 @@ export default function SubscribersPanel() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/subscribers')
+    fetch('/api/subscribers')
       .then(r => r.json())
       .then(data => {
         setSubscribers(data.subscribers || [])
@@ -29,7 +29,7 @@ export default function SubscribersPanel() {
 
   const handleUnsubscribe = async (id: string) => {
     if (!window.confirm('Remove this subscriber?')) return
-    await fetch(`http://localhost:3001/api/subscribers/${id}`, { method: 'DELETE' })
+    await fetch(`/api/subscribers/${id}`, { method: 'DELETE' })
     setSubscribers(prev => prev.filter(s => s._id !== id))
     setCount(c => c - 1)
   }

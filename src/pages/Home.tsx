@@ -46,9 +46,9 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const [filmsData, booksData, journalsData] = await Promise.all([
-          fetch('http://localhost:3001/api/films').then((r) => r.json()),
-          fetch('http://localhost:3001/api/books').then((r) => r.json()),
-          fetch('http://localhost:3001/api/journals').then((r) => r.json()),
+          fetch('/api/films').then((r) => r.json()),
+          fetch('/api/books').then((r) => r.json()),
+          fetch('/api/journals').then((r) => r.json()),
         ])
         if (Array.isArray(filmsData)) setFilms(filmsData)
         if (Array.isArray(booksData)) setBooks(booksData)

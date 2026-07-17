@@ -20,7 +20,7 @@ export default function Film() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/films')
+    fetch('/api/films')
       .then((r) => r.json())
       .then((data) => {
         setFilms(data)
