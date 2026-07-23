@@ -147,7 +147,7 @@ export default function CollectionPanel() {
   const handleStartEdit = (item: BaseItem) => {
     setEditingItem(item)
     setTitle(item.title || '')
-    setCategory(item.category || '')
+    setCategory(Array.isArray(item.category) ? item.category.join(', ') : (item.category || ''))
     setImg(item.img || '')
     setYear(item.year || '')
     setStudio(item.studio || '')
