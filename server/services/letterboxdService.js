@@ -31,14 +31,29 @@ export async function syncLetterboxdData({ username, sendUpdate = () => {} }) {
   try {
     sendUpdate({ type: 'status', message: `Fetching Letterboxd profile for ${cleanUsername}...` })
 
+    const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+    const fetchHtml = (url) => {
+      const curlBin = process.platform === 'win32' ? 'curl.exe' : 'curl'
+      try {
+        const cmd = `${curlBin} -s -L -H "User-Agent: ${UA}" "${url}"`
+        return execSync(cmd, { encoding: 'utf-8', maxBuffer: 1024 * 1024 * 10 })
+      } catch (e) {
+        console.warn(`execSync ${curlBin} failed, attempting Node fetch fallback:`, e.message)
+        try {
+          const nodeCmd = `node -e "fetch('${url}', { headers: { 'User-Agent': '${UA}' } }).then(r => r.text()).then(t => process.stdout.write(t))"`
+          return execSync(nodeCmd, { encoding: 'utf-8', maxBuffer: 1024 * 1024 * 10 })
+        } catch (err2) {
+          throw err2
+        }
+      }
+    }
+
     // Probe profile counts first
     let watchedCount = 0
     let watchlistCount = 0
     try {
-      const profileHtml = execSync(
-        `curl.exe -s -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://letterboxd.com/${cleanUsername}/"`,
-        { encoding: 'utf-8', maxBuffer: 1024 * 1024 * 10 }
-      )
+      const profileHtml = fetchHtml(`https://letterboxd.com/${cleanUsername}/`)
       const watchedMatch = profileHtml.match(/<a href="\/[^/]+\/films\/"><span class="value">(\d+)<\/span>/)
       if (watchedMatch) watchedCount = parseInt(watchedMatch[1], 10)
 
@@ -59,13 +74,6 @@ export async function syncLetterboxdData({ username, sendUpdate = () => {} }) {
       'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 'romance',
       'science-fiction', 'thriller', 'war', 'western'
     ]
-
-    const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-
-    const fetchHtml = (url) => {
-      const cmd = `curl.exe -s -H "User-Agent: ${UA}" "${url}"`
-      return execSync(cmd, { encoding: 'utf-8', maxBuffer: 1024 * 1024 * 10 })
-    }
 
     const getPageCount = (html) => {
       const pageNumRegex = /paginate-page[^>]*><a[^>]*href="[^"]+\/page\/(\d+)\/">/g
