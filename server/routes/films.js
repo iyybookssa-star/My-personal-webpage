@@ -2,6 +2,7 @@ import express from 'express'
 import { execSync } from 'child_process'
 import Film from '../models/Film.js'
 import { syncLetterboxdData } from '../services/letterboxdService.js'
+import { notifyAllSubscribers } from '../services/emailService.js'
 
 const router = express.Router()
 
@@ -18,9 +19,20 @@ router.get('/', async (req, res) => {
 // POST /api/films
 router.post('/', async (req, res) => {
   try {
+    const { notifySubscribers, ...filmData } = req.body
     const lastItem = await Film.findOne().sort({ order: -1 })
     const nextOrder = lastItem ? lastItem.order + 1 : 0
-    const film = await Film.create({ ...req.body, order: nextOrder })
+    const film = await Film.create({ ...filmData, order: nextOrder })
+
+    if (notifySubscribers) {
+      notifyAllSubscribers({
+        subject: `New Film Added: ${film.title}`,
+        title: film.title,
+        excerpt: film.desc || `Added "${film.title}" (${film.year || ''}) to the Film Archive.`,
+        link: `${req.protocol}://${req.get('host')}/films`
+      }).catch(e => console.error('Error broadcasting film notification:', e))
+    }
+
     res.status(201).json(film)
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -30,7 +42,18 @@ router.post('/', async (req, res) => {
 // PUT /api/films/:id
 router.put('/:id', async (req, res) => {
   try {
-    const film = await Film.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { notifySubscribers, ...filmData } = req.body
+    const film = await Film.findByIdAndUpdate(req.params.id, filmData, { new: true })
+
+    if (notifySubscribers && film) {
+      notifyAllSubscribers({
+        subject: `Film Entry Updated: ${film.title}`,
+        title: film.title,
+        excerpt: film.desc || `Updated "${film.title}" (${film.year || ''}) in the Film Archive.`,
+        link: `${req.protocol}://${req.get('host')}/films`
+      }).catch(e => console.error('Error broadcasting film notification:', e))
+    }
+
     res.json(film)
   } catch (err) {
     res.status(500).json({ error: err.message })

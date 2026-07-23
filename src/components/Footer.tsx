@@ -7,10 +7,9 @@ export default function Footer() {
   const letterboxdHref = `https://letterboxd.com/${letterboxdUser}/`
 
   const socials = [
-    { label: 'Twitter', href: '#' },
+    { label: 'Instagram', href: 'https://www.instagram.com/ibrahim_y_alyahya' },
     { label: 'Letterboxd', href: letterboxdHref },
-    { label: 'Steam', href: '#' },
-    { label: 'RSS', href: '#' },
+    { label: 'GitHub', href: 'https://github.com/iyybookssa-star' },
   ]
 
   return (
@@ -21,7 +20,13 @@ export default function Footer() {
           <ul className="footer-links">
             {socials.map(({ label, href }) => (
               <li key={label}>
-                <a href={href} className="footer-link">{label}</a>
+                <a 
+                  href={href} 
+                  className="footer-link"
+                  {...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                >
+                  {label}
+                </a>
               </li>
             ))}
           </ul>

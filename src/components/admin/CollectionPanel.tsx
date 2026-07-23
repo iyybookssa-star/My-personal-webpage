@@ -88,6 +88,7 @@ export default function CollectionPanel() {
   // Journal
   const [date, setDate] = useState('')
   const [isFeatured, setIsFeatured] = useState(false)
+  const [notifySubscribers, setNotifySubscribers] = useState(false)
 
   const fetchItems = async () => {
     setLoading(true)
@@ -126,6 +127,10 @@ export default function CollectionPanel() {
       payload.date = date
       payload.desc = desc
       payload.isFeatured = isFeatured
+    }
+
+    if (notifySubscribers) {
+      payload.notifySubscribers = true
     }
 
     try {
@@ -182,6 +187,10 @@ export default function CollectionPanel() {
       payload.date = date
       payload.desc = desc
       payload.isFeatured = isFeatured
+    }
+
+    if (notifySubscribers) {
+      payload.notifySubscribers = true
     }
 
     try {
@@ -342,6 +351,7 @@ export default function CollectionPanel() {
     setIsCurrent(false)
     setDate('')
     setIsFeatured(false)
+    setNotifySubscribers(false)
   }
 
   return (
@@ -763,6 +773,15 @@ export default function CollectionPanel() {
                 </label>
               )}
 
+              <label className="modal-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textTransform: 'none', marginTop: '12px' }}>
+                <input
+                  type="checkbox"
+                  checked={notifySubscribers}
+                  onChange={(e) => setNotifySubscribers(e.target.checked)}
+                />
+                📧 Send email notification to subscribers
+              </label>
+
               <button type="submit" className="modal-submit-btn">
                 Add Item
               </button>
@@ -920,6 +939,15 @@ export default function CollectionPanel() {
                   Mark as "Featured Post" (Main Hero Post)
                 </label>
               )}
+
+              <label className="modal-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textTransform: 'none', marginTop: '12px' }}>
+                <input
+                  type="checkbox"
+                  checked={notifySubscribers}
+                  onChange={(e) => setNotifySubscribers(e.target.checked)}
+                />
+                📧 Send email notification to subscribers
+              </label>
 
               <button type="submit" className="modal-submit-btn">
                 Save Changes

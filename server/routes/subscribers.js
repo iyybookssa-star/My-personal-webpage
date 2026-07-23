@@ -1,5 +1,6 @@
 import express from 'express'
 import Subscriber from '../models/Subscriber.js'
+import { notifyAllSubscribers } from '../services/emailService.js'
 
 const router = express.Router()
 
@@ -26,6 +27,22 @@ router.post('/', async (req, res) => {
   }
 })
 
+// POST /api/subscribers/notify — broadcast email to active subscribers
+router.post('/notify', async (req, res) => {
+  try {
+    const { subject, title, excerpt, link } = req.body
+    if (!title || !excerpt) {
+      return res.status(400).json({ error: 'Title and excerpt/message are required' })
+    }
+
+    const result = await notifyAllSubscribers({ subject, title, excerpt, link })
+    res.json({ success: true, ...result })
+  } catch (err) {
+    console.error('Notify subscribers error:', err)
+    res.status(500).json({ error: err.message || 'Failed to send notifications' })
+  }
+})
+
 // GET /api/subscribers/count — total count (public)
 router.get('/count', async (req, res) => {
   try {
@@ -36,7 +53,7 @@ router.get('/count', async (req, res) => {
   }
 })
 
-// GET /api/subscribers — full list (admin only, requires token via query param for simplicity)
+// GET /api/subscribers — full list
 router.get('/', async (req, res) => {
   try {
     const subscribers = await Subscriber

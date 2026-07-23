@@ -1,5 +1,6 @@
 import express from 'express'
 import Journal from '../models/Journal.js'
+import { notifyAllSubscribers } from '../services/emailService.js'
 
 const router = express.Router()
 
@@ -16,9 +17,20 @@ router.get('/', async (req, res) => {
 // POST /api/journals
 router.post('/', async (req, res) => {
   try {
+    const { notifySubscribers, ...journalData } = req.body
     const lastItem = await Journal.findOne().sort({ order: -1 })
     const nextOrder = lastItem ? lastItem.order + 1 : 0
-    const journal = await Journal.create({ ...req.body, order: nextOrder })
+    const journal = await Journal.create({ ...journalData, order: nextOrder })
+
+    if (notifySubscribers) {
+      notifyAllSubscribers({
+        subject: `New Journal Post: ${journal.title}`,
+        title: journal.title,
+        excerpt: journal.excerpt || journal.body?.slice(0, 150) + '...',
+        link: `${req.protocol}://${req.get('host')}/journal/${journal.slug || journal._id}`
+      }).catch(e => console.error('Error broadcasting journal notification:', e))
+    }
+
     res.status(201).json(journal)
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -28,7 +40,18 @@ router.post('/', async (req, res) => {
 // PUT /api/journals/:id
 router.put('/:id', async (req, res) => {
   try {
-    const journal = await Journal.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { notifySubscribers, ...journalData } = req.body
+    const journal = await Journal.findByIdAndUpdate(req.params.id, journalData, { new: true })
+
+    if (notifySubscribers && journal) {
+      notifyAllSubscribers({
+        subject: `Journal Updated: ${journal.title}`,
+        title: journal.title,
+        excerpt: journal.excerpt || journal.body?.slice(0, 150) + '...',
+        link: `${req.protocol}://${req.get('host')}/journal/${journal.slug || journal._id}`
+      }).catch(e => console.error('Error broadcasting journal notification:', e))
+    }
+
     res.json(journal)
   } catch (err) {
     res.status(500).json({ error: err.message })
