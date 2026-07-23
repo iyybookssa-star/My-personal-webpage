@@ -154,14 +154,9 @@ export default function Games() {
                 {selectedGame.studio} ({selectedGame.year}) • {selectedGame.category}
               </p>
               {selectedGame.rating > 0 && (
-                <div style={{ marginTop: '8px', color: 'var(--tertiary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px' }}>
-                  ★ {'★'.repeat(Math.round(selectedGame.rating)) + '☆'.repeat(5 - Math.round(selectedGame.rating))} ({selectedGame.rating}/5)
+                <div style={{ marginTop: '12px', color: 'var(--tertiary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '14px', fontWeight: 600 }}>
+                  ★ {'★'.repeat(Math.round(selectedGame.rating))} ({selectedGame.rating}/5)
                 </div>
-              )}
-              {selectedGame.desc && (
-                <p style={{ marginTop: '16px', fontSize: '14px', color: 'var(--on-surface-variant)', maxWidth: '480px', lineHeight: '1.6', textAlign: 'center' }}>
-                  {selectedGame.desc}
-                </p>
               )}
             </div>
           </div>
