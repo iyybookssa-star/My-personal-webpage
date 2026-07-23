@@ -21,6 +21,7 @@ export default function Games() {
   const [activeTab, setActiveTab] = useState('All')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedGame, setSelectedGame] = useState<GameItem | null>(null)
 
   useEffect(() => {
     fetch('/api/games')
@@ -35,6 +36,22 @@ export default function Games() {
       })
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedGame(null)
+      }
+    }
+    if (selectedGame) {
+      window.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [selectedGame])
+
   const filtered = games.filter((g) => {
     const matchTab = activeTab === 'All' || g.category === activeTab
     const matchSearch = g.title.toLowerCase().includes(search.toLowerCase())
@@ -47,7 +64,6 @@ export default function Games() {
         <div className="container">
           {/* Hero */}
           <section className="page-hero">
-            <span className="page-hero-label">{settings.heroLabel}</span>
             <h1>{settings.gamesPageTitle}</h1>
             <p className="page-hero-desc">{settings.gamesPageDesc}</p>
           </section>
@@ -56,7 +72,7 @@ export default function Games() {
 
       <div className="container">
 
-        {/* Toolbar */}
+        {/* Toolbar: Filter Tabs + Search */}
         <div className="games-toolbar">
           <div className="games-filters">
             {TABS.map((tab) => (
@@ -76,56 +92,87 @@ export default function Games() {
               <path d="m21 21-4.35-4.35" />
             </svg>
             <input
+              id="game-search"
               className="search-input"
-              placeholder="Search archive..."
+              placeholder="Search games..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Grid */}
+        {/* Game Grid (Matches Film Grid) */}
         {loading ? (
           <p className="admin-loading" style={{ textAlign: 'center' }}>Loading games...</p>
         ) : filtered.length === 0 ? (
-          <p className="admin-empty" style={{ textAlign: 'center' }}>No items match your query.</p>
+          <p className="admin-empty" style={{ textAlign: 'center' }}>
+            {search ? `No games matching "${search}".` : 'No items in this category yet.'}
+          </p>
         ) : (
-          <div className="games-grid">
+          <div className="film-grid">
             {filtered.map((game) => (
-              <article key={game._id} className="game-card">
-                <div className="game-card-img" style={{ position: 'relative' }}>
-                  <img src={game.img} alt={game.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
-                  <div className="game-card-rating">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                    {game.rating}
-                  </div>
-                </div>
-                <div className="game-card-body">
-                  <div className="game-card-header">
-                    <div className="game-card-title">{game.title}</div>
-                    <div className="game-card-year">{game.year}</div>
-                  </div>
-                  <div className="game-card-studio">{game.studio}</div>
-                  <p className="game-card-desc">{game.desc}</p>
+              <article key={game._id} className="film-card" onClick={() => setSelectedGame(game)}>
+                <div
+                  className="film-card-img"
+                  style={{ backgroundImage: `url('${game.img}')` }}
+                />
+                <div className="film-card-overlay">
+                  <div className="film-card-title">{game.title}</div>
+                  <div className="film-card-year">{game.year}</div>
                 </div>
               </article>
             ))}
           </div>
         )}
 
-        {/* Quote block */}
-        <div className="curator-quote-block">
-          <span className="curator-quote-mark">"</span>
-          <p className="curator-quote-text">
-            "The archive is not merely a list of titles, but a map of spaces inhabited. Each
-            entry represents a distinct set of rules learned, a specific atmosphere breathed,
-            and hours surrendered to the design of another."
-          </p>
-          <span className="curator-quote-attr">— The Curator</span>
+
+        {/* Scroll hint */}
+        <div className="film-scroll-hint">
+          <span>Scroll for more</span>
+          <svg className="scroll-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
         </div>
 
+      </div>
+
+      {/* Game Poster Lightbox Modal */}
+      <div 
+        className={`poster-lightbox${selectedGame ? ' active' : ''}`}
+        onClick={() => setSelectedGame(null)}
+      >
+        {selectedGame && (
+          <div className="poster-lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={selectedGame.img} 
+              alt={selectedGame.title} 
+              className="poster-lightbox-img"
+            />
+            <div className="poster-lightbox-info">
+              <h3 className="poster-lightbox-title">{selectedGame.title}</h3>
+              <p className="poster-lightbox-meta">
+                {selectedGame.studio} ({selectedGame.year}) • {selectedGame.category}
+              </p>
+              {selectedGame.rating > 0 && (
+                <div style={{ marginTop: '8px', color: 'var(--tertiary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px' }}>
+                  ★ {'★'.repeat(Math.round(selectedGame.rating)) + '☆'.repeat(5 - Math.round(selectedGame.rating))} ({selectedGame.rating}/5)
+                </div>
+              )}
+              {selectedGame.desc && (
+                <p style={{ marginTop: '16px', fontSize: '14px', color: 'var(--on-surface-variant)', maxWidth: '480px', lineHeight: '1.6', textAlign: 'center' }}>
+                  {selectedGame.desc}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        <button 
+          className="poster-lightbox-close" 
+          onClick={() => setSelectedGame(null)}
+          aria-label="Close lightbox"
+        >
+          ×
+        </button>
       </div>
     </main>
   )

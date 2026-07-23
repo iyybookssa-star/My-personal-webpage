@@ -10,7 +10,7 @@ interface FilmItem {
   _id: string
   title: string
   year: string
-  category: string
+  category: string | string[]
   img: string
   order: number
 }
@@ -147,12 +147,12 @@ export default function Home() {
                   onClick={() => setSelectedPoster({
                     img: featuredFilm.img,
                     title: featuredFilm.title,
-                    subtitle: `${featuredFilm.category} — ${featuredFilm.year}`
+                    subtitle: `${Array.isArray(featuredFilm.category) ? featuredFilm.category.join(' · ') : featuredFilm.category} — ${featuredFilm.year}`
                   })}
                 >
                   <div className="bento-feature-img" style={{ backgroundImage: `url('${featuredFilm.img}')` }} />
                   <div className="bento-feature-overlay">
-                    <span className="bento-category">{featuredFilm.category}</span>
+                    <span className="bento-category">{Array.isArray(featuredFilm.category) ? featuredFilm.category.join(' · ') : featuredFilm.category}</span>
                     <h3 className="bento-feature-title">{featuredFilm.title}</h3>
                     <p className="bento-feature-desc">Released in {featuredFilm.year}</p>
                   </div>

@@ -9,6 +9,8 @@ import filmsRouter from './routes/films.js'
 import gamesRouter from './routes/games.js'
 import booksRouter from './routes/books.js'
 import journalsRouter from './routes/journals.js'
+import cronRouter from './routes/cron.js'
+import { initCronJobs } from './services/cronService.js'
 import Admin from './models/Admin.js'
 import Film from './models/Film.js'
 import Game from './models/Game.js'
@@ -33,6 +35,7 @@ app.use('/api/films',       filmsRouter)
 app.use('/api/games',       gamesRouter)
 app.use('/api/books',       booksRouter)
 app.use('/api/journals',    journalsRouter)
+app.use('/api/cron',        cronRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -120,6 +123,13 @@ connectDB().then(async () => {
     }
   } catch (seedErr) {
     console.error('Error seeding data:', seedErr.message)
+  }
+
+  // Initialize daily 12 AM scheduled cron job
+  try {
+    initCronJobs()
+  } catch (cronErr) {
+    console.error('Error initializing cron jobs:', cronErr.message)
   }
 
   // Only start listening if we are running locally (not on Vercel)

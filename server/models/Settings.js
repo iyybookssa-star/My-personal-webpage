@@ -48,6 +48,11 @@ const settingsSchema = new mongoose.Schema(
     journalPageTitle: { type: String, default: 'Notes from the Archive' },
     journalPageDesc:  { type: String, default: 'A collection of thoughts, reflections, and deep dives.' },
     letterboxdUsername: { type: String, default: 'engelibrahimo' },
+    autoSyncEnabled:    { type: Boolean, default: true },
+    lastSyncedAt:       { type: Date },
+    lastSyncStatus:     { type: String, default: 'idle' },
+    lastSyncMessage:    { type: String, default: '' },
+    lastSyncCount:      { type: Number, default: 0 },
     hasSeeded: { type: Boolean, default: false },
   },
   { timestamps: true }

@@ -5,7 +5,7 @@ interface FilmItem {
   _id: string
   title: string
   year: string
-  category: string
+  category: string | string[]
   img: string
   order: number
 }
@@ -50,10 +50,16 @@ export default function Film() {
   }, [selectedFilm])
 
   const filtered = films.filter((f) => {
-    const matchTab = activeTab === 'All Media' || f.category === activeTab
+    const matchTab = activeTab === 'All Media' || 
+      (Array.isArray(f.category) ? f.category.includes(activeTab) : f.category === activeTab)
     const matchSearch = f.title.toLowerCase().includes(search.toLowerCase())
     return matchTab && matchSearch
   })
+
+  const getCategoryString = (cat: string | string[]) => {
+    if (Array.isArray(cat)) return cat.join(' · ')
+    return cat
+  }
 
   return (
     <main className="page-main">
@@ -146,7 +152,7 @@ export default function Film() {
             />
             <div className="poster-lightbox-info">
               <h3 className="poster-lightbox-title">{selectedFilm.title}</h3>
-              <p className="poster-lightbox-meta">{selectedFilm.category} — {selectedFilm.year}</p>
+              <p className="poster-lightbox-meta">{getCategoryString(selectedFilm.category)} — {selectedFilm.year}</p>
             </div>
           </div>
         )}

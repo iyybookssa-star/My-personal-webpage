@@ -6,7 +6,7 @@ type CollectionType = 'films' | 'games' | 'books' | 'journals'
 interface BaseItem {
   _id: string
   title: string
-  category: string
+  category: string | string[]
   img: string
   order: number
   [key: string]: any
@@ -236,6 +236,11 @@ export default function CollectionPanel() {
     }
   }
 
+  const handleToggleAutoSync = async () => {
+    const nextState = !(settings.autoSyncEnabled ?? true)
+    await updateSetting('autoSyncEnabled', nextState)
+  }
+
   const handleLetterboxdSync = async () => {
     if (!letterboxdUser.trim()) {
       setSyncMessage('Please enter a valid Letterboxd username.')
@@ -282,12 +287,17 @@ export default function CollectionPanel() {
                 if (!prev) return null
                 return { ...prev, current: prev.current + 1 }
               })
+            } else if (data.isUpdated) {
+              setItems((prev) =>
+                prev.map((item) => (item._id === data.film._id ? data.film : item))
+              )
             }
           } 
           
           else if (data.type === 'done') {
             const wlMsg = data.watchlistCount ? ` (${data.watchlistCount} from watchlist)` : ''
-            setSyncMessage(`Successfully synced! Added ${data.addedCount} new film(s)${wlMsg}.`)
+            const upMsg = data.updatedCount ? `, updated ${data.updatedCount} film state(s)` : ''
+            setSyncMessage(`Successfully synced! Added ${data.addedCount} new film(s)${upMsg}${wlMsg}.`)
             setSyncing(false)
             setSyncProgress(null)
             ev.close()
@@ -362,12 +372,40 @@ export default function CollectionPanel() {
       {/* Letterboxd Sync Widget */}
       {collection === 'films' && (
         <div className="admin-section" style={{ border: '1px solid var(--surface-container-low)', padding: '20px', borderRadius: 'var(--radius)', marginBottom: '24px', backgroundColor: 'var(--surface)' }}>
-          <h3 className="admin-section-title" style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>💚</span> Letterboxd Account Sync
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+            <h3 className="admin-section-title" style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>💚</span> Letterboxd Account Sync & Scheduled 12 AM Cron
+            </h3>
+            
+            {/* Daily 12 AM schedule status badge & toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--surface-container-low)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
+              <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: settings.autoSyncEnabled !== false ? '#4caf50' : '#ff9800' }} />
+              <span style={{ fontWeight: 600, color: 'var(--on-surface)' }}>
+                Daily 12:00 AM Auto-Sync: {settings.autoSyncEnabled !== false ? 'Active' : 'Disabled'}
+              </span>
+              <button
+                type="button"
+                onClick={handleToggleAutoSync}
+                style={{
+                  background: settings.autoSyncEnabled !== false ? 'rgba(255,152,0,0.15)' : 'rgba(76,175,80,0.15)',
+                  color: settings.autoSyncEnabled !== false ? '#ff9800' : '#4caf50',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '3px 10px',
+                  cursor: 'pointer',
+                  fontSize: '0.78rem',
+                  fontWeight: 600
+                }}
+              >
+                {settings.autoSyncEnabled !== false ? 'Disable' : 'Enable'}
+              </button>
+            </div>
+          </div>
+
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.9rem', marginBottom: '16px', lineHeight: '1.4' }}>
-            Enter your Letterboxd username to automatically sync and import your recently watched films from your public RSS feed into MongoDB.
+            Enter your Letterboxd username to import your watched films. Automatically runs every day at <b>12:00 AM (Midnight)</b>.
           </p>
+
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
             <input
               type="text"
@@ -386,6 +424,14 @@ export default function CollectionPanel() {
               {syncing ? 'Syncing...' : 'Sync Now'}
             </button>
           </div>
+
+          {settings.lastSyncedAt && (
+            <p style={{ marginTop: '10px', fontSize: '0.82rem', color: 'var(--on-surface-variant)' }}>
+              🕒 Last 12 AM auto-sync: <b>{new Date(settings.lastSyncedAt).toLocaleString()}</b>
+              {settings.lastSyncCount !== undefined ? ` (${settings.lastSyncCount} new items imported)` : ''}
+            </p>
+          )}
+
           {syncMessage && (
             <p style={{ marginTop: '12px', fontSize: '0.9rem', color: syncMessage.toLowerCase().includes('error') ? '#ff5252' : '#4caf50' }}>
               {syncMessage}
@@ -438,10 +484,11 @@ export default function CollectionPanel() {
             ? items.filter(
                 (item) =>
                   item.title.toLowerCase().includes(searchLower) ||
-                  (item.category || '').toLowerCase().includes(searchLower) ||
+                  (Array.isArray(item.category) ? item.category.join(' ') : item.category || '').toLowerCase().includes(searchLower) ||
                   (item.year || '').includes(adminSearch)
               )
             : items
+
           return loading ? (
             <p className="admin-loading">Loading items...</p>
           ) : items.length === 0 ? (
@@ -541,7 +588,7 @@ export default function CollectionPanel() {
                     <div className="ordering-item-details">
                       <span className="ordering-item-title">{item.title}</span>
                       <span className="ordering-item-meta">
-                        {item.category} {item.year ? `· ${item.year}` : ''}
+                        {Array.isArray(item.category) ? item.category.join(' · ') : item.category} {item.year ? `· ${item.year}` : ''}
                       </span>
                     </div>
 

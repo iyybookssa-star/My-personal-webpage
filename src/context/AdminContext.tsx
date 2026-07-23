@@ -35,6 +35,11 @@ export const DEFAULT_SETTINGS: AdminSettings = {
   journalPageTitle: 'Notes from the Archive',
   journalPageDesc: 'A collection of thoughts, reflections, and deep dives into the spaces between technology, philosophy, and daily existence.',
   letterboxdUsername: 'engelibrahimo',
+  autoSyncEnabled: true,
+  lastSyncedAt: null,
+  lastSyncStatus: 'idle',
+  lastSyncMessage: '',
+  lastSyncCount: 0,
 }
 
 export interface AdminSettings {
@@ -69,6 +74,11 @@ export interface AdminSettings {
   journalPageTitle: string
   journalPageDesc: string
   letterboxdUsername: string
+  autoSyncEnabled?: boolean
+  lastSyncedAt?: string | null
+  lastSyncStatus?: string
+  lastSyncMessage?: string
+  lastSyncCount?: number
 }
 
 interface AdminContextValue {
