@@ -2529,6 +2529,11 @@ button {
   border-color: var(--tertiary, #4f81ff);
 }
 
+select.modal-input option {
+  background: var(--surface-container, #201f1f);
+  color: var(--on-surface, #e5e2e1);
+}
+
 .modal-submit-btn {
   background: var(--tertiary, #4f81ff);
   color: var(--on-tertiary, #fff);

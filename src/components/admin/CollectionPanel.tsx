@@ -11,6 +11,13 @@ interface BaseItem {
   order: number
   [key: string]: any
 }
+const CATEGORY_OPTIONS: Record<CollectionType, string[]> = {
+  games: ['Recently Played', 'Backlog', 'Favorites'],
+  films: ['Recently Watched', 'Favorites', 'Watchlist'],
+  books: ['Currently Reading', 'Favorites', 'Reading List', 'Philosophy & Tech', 'Essays', 'Fiction'],
+  journals: ['Philosophy', 'Tech', 'Daily Life', 'Books', 'Reviews']
+}
+
 
 export default function CollectionPanel() {
   const { settings, updateSetting } = useAdmin()
@@ -76,8 +83,17 @@ export default function CollectionPanel() {
   // Form states
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
+  const [isCustomCategory, setIsCustomCategory] = useState(false)
   const [img, setImg] = useState('')
   const [year, setYear] = useState('')
+
+  const getCategoryOptions = () => {
+    const defaultCats = CATEGORY_OPTIONS[collection] || []
+    const itemCats = items
+      .map((i) => (Array.isArray(i.category) ? i.category.join(', ') : i.category))
+      .filter((c): c is string => Boolean(c))
+    return Array.from(new Set([...defaultCats, ...itemCats]))
+  }
 
   const [desc, setDesc] = useState('')
   // Books
@@ -153,7 +169,9 @@ export default function CollectionPanel() {
   const handleStartEdit = (item: BaseItem) => {
     setEditingItem(item)
     setTitle(item.title || '')
-    setCategory(Array.isArray(item.category) ? item.category.join(', ') : (item.category || ''))
+    const itemCat = Array.isArray(item.category) ? item.category.join(', ') : (item.category || '')
+    setCategory(itemCat)
+    setIsCustomCategory(false)
     setImg(item.img || '')
     setYear(item.year || '')
 
@@ -343,7 +361,8 @@ export default function CollectionPanel() {
 
   const resetForm = () => {
     setTitle('')
-    setCategory('')
+    setCategory(CATEGORY_OPTIONS[collection]?.[0] || '')
+    setIsCustomCategory(false)
     setImg('')
     setYear('')
 
@@ -648,14 +667,39 @@ export default function CollectionPanel() {
 
               <div className="modal-input-group">
                 <label className="modal-label">Category</label>
-                <input
-                  type="text"
+                <select
                   className="modal-input"
-                  required
-                  placeholder="e.g. Favorites, Recently Played, Philosophy"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                />
+                  required={!isCustomCategory}
+                  value={isCustomCategory ? '__custom__' : category}
+                  onChange={(e) => {
+                    if (e.target.value === '__custom__') {
+                      setIsCustomCategory(true)
+                      setCategory('')
+                    } else {
+                      setIsCustomCategory(false)
+                      setCategory(e.target.value)
+                    }
+                  }}
+                >
+                  <option value="" disabled>Select category...</option>
+                  {getCategoryOptions().map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  <option value="__custom__">+ Custom Category...</option>
+                </select>
+                {isCustomCategory && (
+                  <input
+                    type="text"
+                    className="modal-input"
+                    style={{ marginTop: '8px' }}
+                    required
+                    placeholder="Enter custom category name..."
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                )}
               </div>
 
               <div className="modal-input-group">
@@ -792,14 +836,39 @@ export default function CollectionPanel() {
 
               <div className="modal-input-group">
                 <label className="modal-label">Category</label>
-                <input
-                  type="text"
+                <select
                   className="modal-input"
-                  required
-                  placeholder="e.g. Favorites, Recently Watched, Philosophy"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                />
+                  required={!isCustomCategory}
+                  value={isCustomCategory ? '__custom__' : category}
+                  onChange={(e) => {
+                    if (e.target.value === '__custom__') {
+                      setIsCustomCategory(true)
+                      setCategory('')
+                    } else {
+                      setIsCustomCategory(false)
+                      setCategory(e.target.value)
+                    }
+                  }}
+                >
+                  <option value="" disabled>Select category...</option>
+                  {getCategoryOptions().map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  <option value="__custom__">+ Custom Category...</option>
+                </select>
+                {isCustomCategory && (
+                  <input
+                    type="text"
+                    className="modal-input"
+                    style={{ marginTop: '8px' }}
+                    required
+                    placeholder="Enter custom category name..."
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                )}
               </div>
 
               <div className="modal-input-group">
