@@ -151,13 +151,10 @@ export default function Games() {
             <div className="poster-lightbox-info">
               <h3 className="poster-lightbox-title">{selectedGame.title}</h3>
               <p className="poster-lightbox-meta">
-                {selectedGame.studio} ({selectedGame.year}) • {selectedGame.category}
+                {selectedGame.studio && selectedGame.studio !== 'N/A'
+                  ? `${selectedGame.studio} (${selectedGame.year})`
+                  : selectedGame.year} • {selectedGame.category}
               </p>
-              {selectedGame.rating > 0 && (
-                <div style={{ marginTop: '12px', color: 'var(--tertiary)', fontFamily: 'JetBrains Mono, monospace', fontSize: '14px', fontWeight: 600 }}>
-                  ★ {'★'.repeat(Math.round(selectedGame.rating))} ({selectedGame.rating}/5)
-                </div>
-              )}
             </div>
           </div>
         )}

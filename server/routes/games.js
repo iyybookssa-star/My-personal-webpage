@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
       category: req.body.category,
       img: req.body.img,
       year: req.body.year,
-      studio: req.body.studio || 'N/A',
+      studio: req.body.studio || '',
       rating: req.body.rating ? Number(req.body.rating) : 5,
       desc: req.body.desc || '',
       order: nextOrder
@@ -43,7 +43,7 @@ router.put('/:id', async (req, res) => {
       category: req.body.category,
       img: req.body.img,
       year: req.body.year,
-      studio: req.body.studio || 'N/A',
+      studio: req.body.studio || '',
       rating: req.body.rating ? Number(req.body.rating) : 5,
       desc: req.body.desc || ''
     }
