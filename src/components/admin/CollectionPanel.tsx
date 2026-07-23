@@ -87,6 +87,7 @@ export default function CollectionPanel() {
   const [date, setDate] = useState('')
   const [isFeatured, setIsFeatured] = useState(false)
   const [notifySubscribers, setNotifySubscribers] = useState(false)
+  const [formError, setFormError] = useState('')
 
   const fetchItems = async () => {
     setLoading(true)
@@ -136,11 +137,16 @@ export default function CollectionPanel() {
       })
       if (res.ok) {
         setShowAddModal(false)
+        setFormError('')
         resetForm()
         fetchItems()
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        setFormError(errData.error || `Server error (${res.status})`)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      setFormError(err.message || 'Network error — could not save item')
     }
   }
 
@@ -193,11 +199,16 @@ export default function CollectionPanel() {
       if (res.ok) {
         setShowEditModal(false)
         setEditingItem(null)
+        setFormError('')
         resetForm()
         fetchItems()
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        setFormError(errData.error || `Server error (${res.status})`)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      setFormError(err.message || 'Network error — could not update item')
     }
   }
 
@@ -342,6 +353,7 @@ export default function CollectionPanel() {
     setDate('')
     setIsFeatured(false)
     setNotifySubscribers(false)
+    setFormError('')
   }
 
   return (
@@ -743,6 +755,12 @@ export default function CollectionPanel() {
                 📧 Send email notification to subscribers
               </label>
 
+              {formError && (
+                <p style={{ color: '#ff5252', fontSize: '0.88rem', marginTop: '12px', marginBottom: 0 }}>
+                  ⚠️ {formError}
+                </p>
+              )}
+
               <button type="submit" className="modal-submit-btn">
                 Add Item
               </button>
@@ -880,6 +898,12 @@ export default function CollectionPanel() {
                 />
                 📧 Send email notification to subscribers
               </label>
+
+              {formError && (
+                <p style={{ color: '#ff5252', fontSize: '0.88rem', marginTop: '12px', marginBottom: 0 }}>
+                  ⚠️ {formError}
+                </p>
+              )}
 
               <button type="submit" className="modal-submit-btn">
                 Save Changes

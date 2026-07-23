@@ -1,5 +1,9 @@
 import mongoose from 'mongoose'
 
+if (mongoose.models.Game) {
+  delete mongoose.models.Game
+}
+
 const gameSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },

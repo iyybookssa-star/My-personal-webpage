@@ -18,7 +18,17 @@ router.post('/', async (req, res) => {
   try {
     const lastItem = await Game.findOne().sort({ order: -1 })
     const nextOrder = lastItem ? lastItem.order + 1 : 0
-    const game = await Game.create({ ...req.body, order: nextOrder })
+    const gameData = {
+      title: req.body.title,
+      category: req.body.category,
+      img: req.body.img,
+      year: req.body.year,
+      studio: req.body.studio || 'N/A',
+      rating: req.body.rating ? Number(req.body.rating) : 5,
+      desc: req.body.desc || '',
+      order: nextOrder
+    }
+    const game = await Game.create(gameData)
     res.status(201).json(game)
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -28,7 +38,16 @@ router.post('/', async (req, res) => {
 // PUT /api/games/:id
 router.put('/:id', async (req, res) => {
   try {
-    const game = await Game.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const updateData = {
+      title: req.body.title,
+      category: req.body.category,
+      img: req.body.img,
+      year: req.body.year,
+      studio: req.body.studio || 'N/A',
+      rating: req.body.rating ? Number(req.body.rating) : 5,
+      desc: req.body.desc || ''
+    }
+    const game = await Game.findByIdAndUpdate(req.params.id, updateData, { new: true })
     res.json(game)
   } catch (err) {
     res.status(500).json({ error: err.message })
