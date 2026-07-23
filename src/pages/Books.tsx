@@ -5,18 +5,23 @@ interface BookItem {
   _id: string
   title: string
   category: string
-  desc: string
-  pages: string
-  year: string
+  desc?: string
+  pages?: string
+  year?: string
   img: string
-  isCurrent: boolean
+  isCurrent?: boolean
+  order?: number
 }
+
+const TABS = ['All Books', 'Currently Reading', 'Favorites', 'Reading List']
 
 export default function Books() {
   const { settings } = useAdmin()
   const [books, setBooks] = useState<BookItem[]>([])
+  const [activeTab, setActiveTab] = useState('All Books')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedBook, setSelectedBook] = useState<BookItem | null>(null)
 
   useEffect(() => {
     fetch('/api/books')
@@ -31,20 +36,37 @@ export default function Books() {
       })
   }, [])
 
-  const searchLower = search.toLowerCase()
-  const allFiltered = search
-    ? books.filter(
-        (b) =>
-          b.title.toLowerCase().includes(searchLower) ||
-          b.category.toLowerCase().includes(searchLower) ||
-          (b.desc || '').toLowerCase().includes(searchLower)
-      )
-    : books
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedBook(null)
+      }
+    }
+    if (selectedBook) {
+      window.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [selectedBook])
 
-  const currentBook = search ? null : books.find((b) => b.isCurrent)
-  const remainingBooks = search
-    ? allFiltered
-    : allFiltered.filter((b) => !b.isCurrent)
+  const filtered = books.filter((b) => {
+    let matchTab = true
+    if (activeTab === 'Currently Reading') {
+      matchTab = !!b.isCurrent || b.category === 'Currently Reading'
+    } else if (activeTab !== 'All Books') {
+      matchTab = b.category === activeTab
+    }
+
+    const searchLower = search.toLowerCase()
+    const matchSearch =
+      b.title.toLowerCase().includes(searchLower) ||
+      (b.category && b.category.toLowerCase().includes(searchLower))
+
+    return matchTab && matchSearch
+  })
 
   return (
     <main className="page-main">
@@ -60,9 +82,21 @@ export default function Books() {
 
       <div className="container">
 
-        {/* Search bar */}
-        <div className="games-toolbar" style={{ marginBottom: '32px' }}>
-          <div className="search-input-wrapper" style={{ maxWidth: '400px', width: '100%' }}>
+        {/* Toolbar: Filter Tabs + Search */}
+        <div className="games-toolbar">
+          <div className="games-filters">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                className={`filter-tab${activeTab === tab ? ' active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="search-input-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
@@ -77,78 +111,69 @@ export default function Books() {
           </div>
         </div>
 
-        {/* Current Reads */}
+        {/* Book Grid (Matches Film Grid) */}
         {loading ? (
           <p className="admin-loading" style={{ textAlign: 'center' }}>Loading books...</p>
+        ) : filtered.length === 0 ? (
+          <p className="admin-empty" style={{ textAlign: 'center' }}>
+            {search ? `No books matching "${search}".` : 'No items in this category yet.'}
+          </p>
         ) : (
-          <section>
-            <div className="books-section-header">
-              <span className="books-section-num">01</span>
-              <span className="books-section-title">Library Index</span>
-              <div className="books-section-line" />
-            </div>
-
-            <div className="books-bento">
-              {/* Feature */}
-              {currentBook ? (
-                <article className="book-feature-card">
-                  <div
-                    className="book-feature-img"
-                    style={{ backgroundImage: `url('${currentBook.img}')` }}
-                  />
-                  <div className="book-feature-body">
-                    <span className="book-feature-category">{currentBook.category}</span>
-                    <h2 className="book-feature-title">{currentBook.title}</h2>
-                    <p className="book-feature-desc">{currentBook.desc}</p>
-                    <div className="book-feature-stats">
-                      {currentBook.pages && (
-                        <span className="book-stat">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                          </svg>
-                          {currentBook.pages} pages
-                        </span>
-                      )}
-                      {currentBook.year && (
-                        <span className="book-stat">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                          </svg>
-                          {currentBook.year}
-                        </span>
-                      )}
-                    </div>
+          <div className="film-grid">
+            {filtered.map((book) => (
+              <article key={book._id} className="film-card" onClick={() => setSelectedBook(book)}>
+                <div
+                  className="film-card-img"
+                  style={{ backgroundImage: `url('${book.img}')` }}
+                />
+                <div className="film-card-overlay">
+                  <div className="film-card-title">{book.title}</div>
+                  <div className="film-card-year">
+                    {book.year ? book.year : (book.pages ? `${book.pages} pages` : '')}
                   </div>
-                </article>
-              ) : (
-                <div className="book-feature-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
-                  <p className="admin-empty">No book marked as "Currently Reading".</p>
                 </div>
-              )}
-
-              {/* Mini cards */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {remainingBooks.map((book) => (
-                  <article key={book._id} className="book-mini-card">
-                    <span className="book-mini-category">{book.category}</span>
-                    <h3 className="book-mini-title">{book.title}</h3>
-                    <p className="book-mini-desc">{book.desc}</p>
-                  </article>
-                ))}
-                {remainingBooks.length === 0 && (
-                  <p className="admin-empty">
-                    {search ? `No books matching "${search}".` : 'No archived books.'}
-                  </p>
-                )}
-              </div>
-            </div>
-          </section>
+              </article>
+            ))}
+          </div>
         )}
 
+        {/* Scroll hint */}
+        <div className="film-scroll-hint">
+          <span>Scroll for more</span>
+          <svg className="scroll-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
+        </div>
+
+      </div>
+
+      {/* Book Poster Lightbox Modal */}
+      <div 
+        className={`poster-lightbox${selectedBook ? ' active' : ''}`}
+        onClick={() => setSelectedBook(null)}
+      >
+        {selectedBook && (
+          <div className="poster-lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={selectedBook.img} 
+              alt={selectedBook.title} 
+              className="poster-lightbox-img"
+            />
+            <div className="poster-lightbox-info">
+              <h3 className="poster-lightbox-title">{selectedBook.title}</h3>
+              <p className="poster-lightbox-meta">
+                {selectedBook.category} {selectedBook.year ? `(${selectedBook.year})` : ''} {selectedBook.pages ? `• ${selectedBook.pages} pages` : ''}
+              </p>
+            </div>
+          </div>
+        )}
+        <button 
+          className="poster-lightbox-close" 
+          onClick={() => setSelectedBook(null)}
+          aria-label="Close lightbox"
+        >
+          ×
+        </button>
       </div>
     </main>
   )
