@@ -12,8 +12,8 @@ interface BaseItem {
   [key: string]: any
 }
 const CATEGORY_OPTIONS: Record<CollectionType, string[]> = {
-  games: ['Recently Played', 'Backlog', 'Favorites'],
-  films: ['Recently Watched', 'Favorites', 'Watchlist'],
+  games: ['Played', 'Recently Played', 'Backlog', 'Favorites'],
+  films: ['Watched', 'Recently Watched', 'Favorites', 'Watchlist'],
   books: ['Currently Reading', 'Favorites', 'Reading List', 'Philosophy & Tech', 'Essays', 'Fiction'],
   journals: ['Philosophy', 'Tech', 'Daily Life', 'Books', 'Reviews']
 }

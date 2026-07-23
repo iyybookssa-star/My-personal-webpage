@@ -10,7 +10,7 @@ interface FilmItem {
   order: number
 }
 
-const TABS = ['All Media', 'Recently Watched', 'Favorites', 'Watchlist']
+const TABS = ['All Media', 'Watched', 'Recently Watched', 'Favorites', 'Watchlist']
 
 export default function Film() {
   const { settings } = useAdmin()

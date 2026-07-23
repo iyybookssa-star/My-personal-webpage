@@ -13,7 +13,7 @@ interface GameItem {
   order: number
 }
 
-const TABS = ['All', 'Recently Played', 'Backlog', 'Favorites']
+const TABS = ['All', 'Played', 'Recently Played', 'Backlog', 'Favorites']
 
 export default function Games() {
   const { settings } = useAdmin()
