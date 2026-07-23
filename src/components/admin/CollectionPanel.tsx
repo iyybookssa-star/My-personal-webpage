@@ -78,9 +78,7 @@ export default function CollectionPanel() {
   const [category, setCategory] = useState('')
   const [img, setImg] = useState('')
   const [year, setYear] = useState('')
-  // Games
-  const [studio, setStudio] = useState('')
-  const [rating, setRating] = useState('5')
+
   const [desc, setDesc] = useState('')
   // Books
   const [pages, setPages] = useState('')
@@ -115,9 +113,6 @@ export default function CollectionPanel() {
       payload.year = year
     } else if (collection === 'games') {
       payload.year = year
-      payload.studio = studio
-      payload.rating = Number(rating)
-      payload.desc = desc
     } else if (collection === 'books') {
       payload.pages = pages
       payload.year = year
@@ -155,8 +150,7 @@ export default function CollectionPanel() {
     setCategory(Array.isArray(item.category) ? item.category.join(', ') : (item.category || ''))
     setImg(item.img || '')
     setYear(item.year || '')
-    setStudio(item.studio || '')
-    setRating(String(item.rating || '5'))
+
     setDesc(item.desc || '')
     setPages(item.pages || '')
     setIsCurrent(!!item.isCurrent)
@@ -175,9 +169,6 @@ export default function CollectionPanel() {
       payload.year = year
     } else if (collection === 'games') {
       payload.year = year
-      payload.studio = studio
-      payload.rating = Number(rating)
-      payload.desc = desc
     } else if (collection === 'books') {
       payload.pages = pages
       payload.year = year
@@ -344,8 +335,7 @@ export default function CollectionPanel() {
     setCategory('')
     setImg('')
     setYear('')
-    setStudio('')
-    setRating('5')
+
     setDesc('')
     setPages('')
     setIsCurrent(false)
@@ -683,35 +673,6 @@ export default function CollectionPanel() {
                 </div>
               )}
 
-              {collection === 'games' && (
-                <>
-                  <div className="modal-input-group">
-                    <label className="modal-label">Studio</label>
-                    <input
-                      type="text"
-                      className="modal-input"
-                      required
-                      placeholder="Remedy Entertainment"
-                      value={studio}
-                      onChange={(e) => setStudio(e.target.value)}
-                    />
-                  </div>
-                  <div className="modal-input-group">
-                    <label className="modal-label">Rating (1 to 5)</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={5}
-                      step={0.5}
-                      className="modal-input"
-                      required
-                      value={rating}
-                      onChange={(e) => setRating(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
               {collection === 'books' && (
                 <div className="modal-input-group">
                   <label className="modal-label">Pages</label>
@@ -739,7 +700,7 @@ export default function CollectionPanel() {
                 </div>
               )}
 
-              {(collection === 'games' || collection === 'books' || collection === 'journals') && (
+              {(collection === 'books' || collection === 'journals') && (
                 <div className="modal-input-group">
                   <label className="modal-label">Description</label>
                   <textarea
@@ -850,35 +811,6 @@ export default function CollectionPanel() {
                 </div>
               )}
 
-              {collection === 'games' && (
-                <>
-                  <div className="modal-input-group">
-                    <label className="modal-label">Studio</label>
-                    <input
-                      type="text"
-                      className="modal-input"
-                      required
-                      placeholder="Remedy Entertainment"
-                      value={studio}
-                      onChange={(e) => setStudio(e.target.value)}
-                    />
-                  </div>
-                  <div className="modal-input-group">
-                    <label className="modal-label">Rating (1 to 5)</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={5}
-                      step={0.5}
-                      className="modal-input"
-                      required
-                      value={rating}
-                      onChange={(e) => setRating(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
               {collection === 'books' && (
                 <div className="modal-input-group">
                   <label className="modal-label">Pages</label>
@@ -906,7 +838,7 @@ export default function CollectionPanel() {
                 </div>
               )}
 
-              {(collection === 'games' || collection === 'books' || collection === 'journals') && (
+              {(collection === 'books' || collection === 'journals') && (
                 <div className="modal-input-group">
                   <label className="modal-label">Description</label>
                   <textarea
