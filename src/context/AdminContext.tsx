@@ -85,6 +85,7 @@ interface AdminContextValue {
   settings: AdminSettings
   updateSetting: <K extends keyof AdminSettings>(key: K, value: AdminSettings[K]) => void
   resetSettings: () => void
+  resetVisits: () => Promise<void>
   isAuthenticated: boolean
   login: (password: string) => Promise<boolean>
   logout: () => void
@@ -208,6 +209,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     fetch(API, { method: 'DELETE' }).catch(() => {})
   }
 
+  const resetVisits = async () => {
+    try {
+      const res = await fetch('/api/settings/reset-visits', { method: 'POST' })
+      const data = await res.json()
+      if (data.visits !== undefined) setVisits(data.visits)
+    } catch (err) {
+      console.error('Failed to reset visits:', err)
+      setVisits(0)
+    }
+  }
+
   const login = async (password: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/login', {
@@ -244,7 +256,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AdminContext.Provider value={{ settings, updateSetting, resetSettings, isAuthenticated, login, logout, dbConnected, visits, subscriberCount }}>
+    <AdminContext.Provider value={{ settings, updateSetting, resetSettings, resetVisits, isAuthenticated, login, logout, dbConnected, visits, subscriberCount }}>
       {children}
     </AdminContext.Provider>
   )

@@ -22,10 +22,16 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('colors')
-  const { resetSettings, logout, dbConnected } = useAdmin()
+  const { resetSettings, resetVisits, visits, logout, dbConnected } = useAdmin()
 
   const handleReset = () => {
     if (window.confirm('Reset all settings to defaults?')) resetSettings()
+  }
+
+  const handleResetVisits = async () => {
+    if (window.confirm(`Reset site visits counter (${visits}) back to 0?`)) {
+      await resetVisits()
+    }
   }
 
   return (
@@ -54,6 +60,19 @@ function AdminDashboard() {
         </nav>
 
         <div className="admin-sidebar-footer">
+          <div style={{ marginBottom: '12px', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ fontSize: '12px', color: '#a9a9b3', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>👀 Visits: <b style={{ color: '#fff' }}>{visits}</b></span>
+              <button 
+                onClick={handleResetVisits}
+                style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline', padding: 0 }}
+                title="Reset site visits counter to 0"
+              >
+                Reset to 0
+              </button>
+            </div>
+          </div>
+
           <button className="admin-reset-btn" onClick={handleReset}>
             ↺ Reset to Defaults
           </button>

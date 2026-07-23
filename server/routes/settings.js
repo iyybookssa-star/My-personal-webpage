@@ -32,6 +32,21 @@ router.post('/increment-visits', async (req, res) => {
   }
 })
 
+// POST /api/settings/reset-visits — reset visits counter to 0
+router.post('/reset-visits', async (req, res) => {
+  try {
+    const settings = await Settings.findOneAndUpdate(
+      { key: 'main' },
+      { $set: { visits: 0 } },
+      { new: true, upsert: true }
+    )
+    res.json({ visits: settings.visits })
+  } catch (err) {
+    console.error('Failed to reset visits:', err)
+    res.status(500).json({ error: 'Failed to reset visits' })
+  }
+})
+
 // PUT /api/settings — update settings
 router.put('/', async (req, res) => {
   try {
